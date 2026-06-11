@@ -36,3 +36,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# secrets doc — never commit
+PROJECT_SECRETS.md
+
+# windows artifacts
+nul

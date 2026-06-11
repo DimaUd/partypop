@@ -54,9 +54,49 @@ export async function POST(req: NextRequest) {
 
   const supabase = getServerSupabase();
   if (supabase) {
+    // Double-booking check: is this date+hour already taken?
+    if (record.event_hour) {
+      const { data: existing } = await supabase
+        .from("bookings")
+        .select("id")
+        .eq("event_date", record.event_date)
+        .eq("event_hour", record.event_hour)
+        .neq("status", "cancelled")
+        .limit(1);
+      if (existing && existing.length > 0) {
+        return NextResponse.json({ error: "השעה הזו כבר תפוסה — בחרו שעה אחרת", code: "hour_taken" }, { status: 409 });
+      }
+    }
+
+    // Check availability blocks (admin-blocked slots)
+    const dateObj = new Date(record.event_date);
+    const weekday = dateObj.getUTCDay(); // 0=Sun...6=Sat
+    const { data: blocks } = await supabase
+      .from("availability_blocks")
+      .select("id, time_window")
+      .or(
+        `and(block_date.eq.${record.event_date},time_window.is.null),` +
+        `and(block_date.eq.${record.event_date},time_window.eq.${record.event_hour}),` +
+        `and(weekday.eq.${weekday},time_window.is.null),` +
+        `and(weekday.eq.${weekday},time_window.eq.${record.event_hour})`
+      )
+      .limit(1);
+    if (blocks && blocks.length > 0) {
+      return NextResponse.json({ error: "התאריך או השעה חסומים — בחרו מועד אחר", code: "blocked" }, { status: 409 });
+    }
+
     const { error } = await supabase.from("bookings").insert(record);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   } else {
+    // In-memory double-booking check
+    if (record.event_hour) {
+      const clash = store.bookings.find(
+        (b) => b.event_date === record.event_date && b.event_hour === record.event_hour && b.status !== "cancelled"
+      );
+      if (clash) {
+        return NextResponse.json({ error: "השעה הזו כבר תפוסה — בחרו שעה אחרת", code: "hour_taken" }, { status: 409 });
+      }
+    }
     store.bookings.push({ ...record, id: nextId(), created_at: new Date().toISOString() });
   }
   return NextResponse.json({ ok: true });

@@ -74,10 +74,25 @@ create table if not exists rewards (
   created_at timestamptz default now()
 );
 
+-- Availability blocks: admin can block full days, specific hours, or recurring weekdays.
+-- weekday: 0=Sunday...6=Saturday. NULL means one-time block.
+-- time_window: specific hour like '16:00'. NULL means all-day block.
+create table if not exists availability_blocks (
+  id uuid primary key default gen_random_uuid(),
+  block_date date,                      -- specific date (one-time block)
+  weekday int,                          -- 0=Sun,1=Mon,...,6=Sat (recurring weekly block)
+  time_window text,                     -- specific hour e.g. '16:00'; NULL = all hours on that day
+  reason text default '',               -- admin note: 'חג', 'תחזוקה', etc.
+  created_at timestamptz default now(),
+  constraint block_has_date_or_weekday check (block_date is not null or weekday is not null)
+);
+
 create index if not exists bookings_date_idx on bookings(event_date);
 create index if not exists bookings_amb_idx on bookings(ambassador_slug);
 create index if not exists rewards_amb_idx on rewards(ambassador_slug);
 create index if not exists ambassadors_parent_idx on ambassadors(parent_slug);
+create index if not exists avail_blocks_date_idx on availability_blocks(block_date);
+create index if not exists avail_blocks_weekday_idx on availability_blocks(weekday);
 
 -- Seed packages
 insert into packages (id, name, emoji, price, "desc", popular) values
