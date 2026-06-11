@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { color-scheme: dark; }
+
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(157, 78, 221, 0.18), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgba(0, 240, 255, 0.12), transparent 55%),
+    #0b0b1a;
+  color: #eef0ff;
+  min-height: 100vh;
+}
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl2 px-5 py-3 font-bold transition duration-300 active:scale-[0.97]; }
+  .btn-primary { @apply btn bg-neon-pink text-white shadow-glow-pink hover:brightness-110; }
+  .btn-cyan { @apply btn bg-neon-cyan text-[#06222a] shadow-glow-cyan hover:brightness-110; }
+  .btn-whatsapp { @apply btn bg-[#25D366] text-[#06301a] hover:brightness-110; }
+  .btn-ghost { @apply btn bg-surface ring-1 ring-white/10 text-gray-200 hover:bg-surface2; }
+  .card { @apply rounded-xl2 bg-surface p-4 ring-1 ring-white/10; }
+  .card-glow { @apply rounded-xl2 bg-surface p-4 ring-1 ring-neon-pink/40 shadow-glow-pink; }
+  .input { @apply w-full rounded-xl bg-surface2 px-4 py-3 text-base text-white placeholder:text-gray-500 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-neon-pink; }
+  .label { @apply mb-1 block text-sm font-semibold text-gray-300; }
+  .chip { @apply cursor-pointer rounded-xl px-4 py-2 text-sm font-bold transition active:scale-[0.97]; }
+  .chip-off { @apply bg-surface2 text-gray-300 ring-1 ring-white/10; }
+  .chip-on { @apply bg-neon-pink text-white shadow-glow-pink; }
+  .price-tag { @apply rounded-full bg-surface2 px-3 py-1 font-black text-neon-cyan; }
+  .badge { @apply rounded-full px-3 py-1 text-xs font-bold; }
+}
