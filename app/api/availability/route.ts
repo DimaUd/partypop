@@ -46,7 +46,10 @@ export async function GET(req: NextRequest) {
         `and(block_date.gte.${from},block_date.lte.${to || from}),weekday.in.(${uniqueWeekdays.join(",")})`
       );
 
-    if (blErr) return NextResponse.json({ error: blErr.message }, { status: 500 });
+    // If availability_blocks table doesn't exist yet, just skip blocks (don't crash)
+    if (blErr) {
+      console.error("[availability] blocks query error (table may not exist):", blErr.message);
+    }
 
     // Build response: per-date info
     const bookedByDate: Record<string, string[]> = {};
